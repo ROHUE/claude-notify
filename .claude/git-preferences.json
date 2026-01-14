@@ -1,7 +1,7 @@
 {
   "gitInitAsked": true,
   "gitInitPreference": true,
-  "remoteAsked": false,
-  "remotePreference": null,
-  "remoteUrl": null
+  "remoteAsked": true,
+  "remotePreference": true,
+  "remoteUrl": "https://github.com/ROHUE/claude-notify.git"
 }
