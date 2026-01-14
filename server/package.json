@@ -1,0 +1,18 @@
+{
+  "name": "claude-notify-server",
+  "version": "1.0.0",
+  "description": "Push notification server for Claude Code notifications",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "generate-vapid": "node -e \"import('web-push').then(wp => { const keys = wp.default.generateVAPIDKeys(); console.log(JSON.stringify(keys, null, 2)); })\""
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "web-push": "^3.6.7",
+    "cors": "^2.8.5",
+    "better-sqlite3": "^9.4.3"
+  }
+}

@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Database and keys (sensitive)
+server/notifications.db
+server/vapid-keys.json
+
+# Development files
+.working/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
