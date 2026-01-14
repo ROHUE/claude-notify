@@ -276,7 +276,11 @@ async function clearAll() {
 
 // Utility: Format timestamp
 function formatTime(timestamp) {
-  const date = new Date(timestamp);
+  // Server stores UTC - append Z if no timezone marker
+  const utcTimestamp = timestamp.includes('Z') || timestamp.includes('+')
+    ? timestamp
+    : timestamp.replace(' ', 'T') + 'Z';
+  const date = new Date(utcTimestamp);
   const now = new Date();
   const diff = now - date;
 
