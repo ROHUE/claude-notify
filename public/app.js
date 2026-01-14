@@ -266,11 +266,21 @@ async function deleteNotification(id) {
 async function clearAll() {
   if (!confirm('Clear all notifications?')) return;
 
+  clearAllBtn.disabled = true;
+  clearAllBtn.textContent = 'Clearing...';
+
   try {
-    await fetch(`${API_BASE}/api/notifications`, { method: 'DELETE' });
+    const res = await fetch(`${API_BASE}/api/notifications`, { method: 'DELETE' });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
     await loadNotifications();
   } catch (err) {
     console.error('Failed to clear:', err);
+    alert('Failed to clear notifications: ' + err.message);
+  } finally {
+    clearAllBtn.disabled = false;
+    clearAllBtn.textContent = 'Clear All';
   }
 }
 
