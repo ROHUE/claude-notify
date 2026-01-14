@@ -1,21 +1,10 @@
 ---
-name: deploy
-description: Deploy claude-notify PWA updates to technovators VPS (https://claude.technovators.co.za)
-user-invocable: true
-scope: project
+description: "Deploy claude-notify PWA updates to technovators VPS (https://claude.technovators.co.za)"
 ---
 
-# Claude-Notify Deploy Skill
+# /deploy - Claude-Notify Deployment
 
-**Scope:** This skill is specific to the `claude-notify` project only.
-
-**Target:** Deploys to https://claude.technovators.co.za on the technovators VPS.
-
-## Usage
-
-```
-/deploy
-```
+**Target:** https://claude.technovators.co.za on technovators VPS
 
 ## Configuration
 
