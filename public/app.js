@@ -216,7 +216,9 @@ function renderNotifications(notifications) {
       terminalBtn.textContent = 'Terminal';
       terminalBtn.style.background = 'var(--blue)';
       terminalBtn.addEventListener('click', () => {
-        const url = n.terminalUrl || `${window.TTYD_URL}/?tmux_session=${encodeURIComponent(n.session)}`;
+        // Build tmux target: session:window
+        const target = n.window ? `${n.session}:${n.window}` : n.session;
+        const url = n.terminalUrl || `${window.TTYD_URL}/?arg=${encodeURIComponent(target)}`;
         window.open(url, '_blank');
       });
       actions.appendChild(terminalBtn);
