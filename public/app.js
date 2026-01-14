@@ -211,13 +211,12 @@ function renderNotifications(notifications) {
     const actions = document.createElement('div');
     actions.className = 'notification-actions';
 
-    if (n.session && window.TTYD_URL) {
+    if (n.terminalUrl || (n.session && window.TTYD_URL)) {
       const terminalBtn = document.createElement('button');
       terminalBtn.textContent = 'Terminal';
       terminalBtn.style.background = 'var(--blue)';
       terminalBtn.addEventListener('click', () => {
-        // ttyd uses ?arg=VALUE format to pass arguments to the command
-        const url = `${window.TTYD_URL}/?arg=${encodeURIComponent(n.session)}`;
+        const url = n.terminalUrl || `${window.TTYD_URL}/?tmux_session=${encodeURIComponent(n.session)}`;
         window.open(url, '_blank');
       });
       actions.appendChild(terminalBtn);
