@@ -101,6 +101,11 @@ app.post('/api/notify', async (req, res) => {
     `);
     const result = stmt.run(session || '', window || '', message, notification_type || 'general');
 
+    const TTYD_URL = process.env.TTYD_URL || process.env.TTYD_HOST;
+    const terminalUrl = session && TTYD_URL
+      ? `${TTYD_URL}/?tmux_session=${encodeURIComponent(session)}`
+      : null;
+
     // Send push to all subscribed devices
     const subscriptions = db.prepare('SELECT * FROM subscriptions').all();
 
@@ -111,7 +116,8 @@ app.post('/api/notify', async (req, res) => {
         id: result.lastInsertRowid,
         session,
         window,
-        notification_type
+        notification_type,
+        terminalUrl
       }
     });
 
@@ -199,7 +205,15 @@ app.get('/api/health', (req, res) => {
 
 // Serve PWA for all other routes
 app.get('*', (req, res) => {
-  res.sendFile(join(__dirname, '../public/index.html'));
+  const html = fs.readFileSync(join(__dirname, '../public/index.html'), 'utf-8');
+  const ttydUrl = process.env.TTYD_URL || process.env.TTYD_HOST || '';
+
+  const modifiedHtml = html.replace(
+    '</head>',
+    `<script>window.TTYD_URL = ${JSON.stringify(ttydUrl)};</script></head>`
+  );
+
+  res.send(modifiedHtml);
 });
 
 app.listen(PORT, () => {

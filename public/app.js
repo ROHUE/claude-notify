@@ -211,6 +211,17 @@ function renderNotifications(notifications) {
     const actions = document.createElement('div');
     actions.className = 'notification-actions';
 
+    if (n.session && window.TTYD_URL) {
+      const terminalBtn = document.createElement('button');
+      terminalBtn.textContent = '🖥️ Terminal';
+      terminalBtn.style.background = 'var(--blue)';
+      terminalBtn.addEventListener('click', () => {
+        const url = `${window.TTYD_URL}/?tmux_session=${encodeURIComponent(n.session)}`;
+        window.open(url, '_blank');
+      });
+      actions.appendChild(terminalBtn);
+    }
+
     if (!n.read) {
       const readBtn = document.createElement('button');
       readBtn.textContent = 'Mark Read';

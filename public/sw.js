@@ -68,6 +68,7 @@ self.addEventListener('push', event => {
     requireInteraction: true,
     data: data.data,
     actions: [
+      ...(data.data?.terminalUrl ? [{ action: 'terminal', title: 'Open Terminal' }] : []),
       { action: 'view', title: 'View' },
       { action: 'dismiss', title: 'Dismiss' }
     ]
@@ -84,17 +85,23 @@ self.addEventListener('notificationclick', event => {
 
   if (event.action === 'dismiss') return;
 
-  // Open or focus the app
+  const terminalUrl = event.notification.data?.terminalUrl;
+
+  if (event.action === 'terminal' && terminalUrl) {
+    event.waitUntil(
+      clients.openWindow(terminalUrl)
+    );
+    return;
+  }
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then(windowClients => {
-        // Focus existing window if open
         for (const client of windowClients) {
           if (client.url.includes(self.registration.scope) && 'focus' in client) {
             return client.focus();
           }
         }
-        // Otherwise open new window
         if (clients.openWindow) {
           return clients.openWindow('/');
         }
