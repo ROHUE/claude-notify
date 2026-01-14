@@ -15,6 +15,19 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+app.get('/', (req, res) => {
+  const html = fs.readFileSync(join(__dirname, '../public/index.html'), 'utf-8');
+  const ttydUrl = process.env.TTYD_URL || process.env.TTYD_HOST || '';
+
+  const modifiedHtml = html.replace(
+    '</head>',
+    `<script>window.TTYD_URL = ${JSON.stringify(ttydUrl)};</script></head>`
+  );
+
+  res.send(modifiedHtml);
+});
+
 app.use(express.static(join(__dirname, '../public')));
 
 // Database setup
@@ -161,7 +174,17 @@ app.get('/api/notifications', (req, res) => {
       ORDER BY timestamp DESC
       LIMIT 50
     `).all();
-    res.json(notifications);
+
+    const TTYD_URL = process.env.TTYD_URL || process.env.TTYD_HOST;
+
+    const withTerminalUrl = notifications.map(n => ({
+      ...n,
+      terminalUrl: n.session && TTYD_URL
+        ? `${TTYD_URL}/?tmux_session=${encodeURIComponent(n.session)}`
+        : null
+    }));
+
+    res.json(withTerminalUrl);
   } catch (err) {
     console.error('List error:', err);
     res.status(500).json({ error: 'Failed to fetch notifications' });
@@ -201,19 +224,6 @@ app.delete('/api/notifications', (req, res) => {
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// Serve PWA for all other routes
-app.get('*', (req, res) => {
-  const html = fs.readFileSync(join(__dirname, '../public/index.html'), 'utf-8');
-  const ttydUrl = process.env.TTYD_URL || process.env.TTYD_HOST || '';
-
-  const modifiedHtml = html.replace(
-    '</head>',
-    `<script>window.TTYD_URL = ${JSON.stringify(ttydUrl)};</script></head>`
-  );
-
-  res.send(modifiedHtml);
 });
 
 app.listen(PORT, () => {

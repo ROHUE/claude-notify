@@ -213,10 +213,11 @@ function renderNotifications(notifications) {
 
     if (n.session && window.TTYD_URL) {
       const terminalBtn = document.createElement('button');
-      terminalBtn.textContent = '🖥️ Terminal';
+      terminalBtn.textContent = 'Terminal';
       terminalBtn.style.background = 'var(--blue)';
       terminalBtn.addEventListener('click', () => {
-        const url = `${window.TTYD_URL}/?tmux_session=${encodeURIComponent(n.session)}`;
+        // ttyd uses ?arg=VALUE format to pass arguments to the command
+        const url = `${window.TTYD_URL}/?arg=${encodeURIComponent(n.session)}`;
         window.open(url, '_blank');
       });
       actions.appendChild(terminalBtn);
