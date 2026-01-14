@@ -1,12 +1,15 @@
 ---
 name: deploy
-description: Deploy updates to claude-notify PWA on technovators server
+description: Deploy claude-notify PWA updates to technovators VPS (https://claude.technovators.co.za)
 user-invocable: true
+scope: project
 ---
 
-# Deploy Skill
+# Claude-Notify Deploy Skill
 
-Deploy updates to the claude-notify PWA server at https://claude.technovators.co.za
+**Scope:** This skill is specific to the `claude-notify` project only.
+
+**Target:** Deploys to https://claude.technovators.co.za on the technovators VPS.
 
 ## Usage
 
@@ -14,42 +17,51 @@ Deploy updates to the claude-notify PWA server at https://claude.technovators.co
 /deploy
 ```
 
-## Server Details
+## Configuration
 
-- **Host**: technovators (SSH config)
-- **App path**: ~/claude-notify
-- **Service**: claude-notify (systemd user service)
-- **Port**: 4200
-- **URL**: https://claude.technovators.co.za
+| Setting | Value |
+|---------|-------|
+| SSH Host | `technovators` |
+| Remote Path | `~/claude-notify` |
+| Service | `claude-notify` (systemd user) |
+| Port | `4200` |
+| Public URL | `https://claude.technovators.co.za` |
+| Local Path | `/mnt/c/Users/ZamokuhleMthimkhulu/eztended/CascadeProjects/claude-notify` |
 
 ## Deployment Steps
 
-When this skill is invoked, perform these steps:
+Execute these steps in order:
 
-### 1. Check for local changes
+### Step 1: Check & commit local changes
 ```bash
 git -C /mnt/c/Users/ZamokuhleMthimkhulu/eztended/CascadeProjects/claude-notify status --porcelain
 ```
-If changes exist, commit and push them first.
+- If changes exist → commit with meaningful message and push
+- If no changes → proceed to step 2
 
-### 2. Pull changes on server
+### Step 2: Pull on VPS
 ```bash
-ssh technovators "cd ~/claude-notify && git pull"
+ssh technovators "cd ~/claude-notify && git pull origin main"
 ```
 
-### 3. Install dependencies (if package.json changed)
+### Step 3: Install dependencies (only if package.json changed)
 ```bash
 ssh technovators "cd ~/claude-notify/server && npm install --omit=dev"
 ```
 
-### 4. Restart the service
+### Step 4: Restart service
 ```bash
 ssh technovators "systemctl --user restart claude-notify"
 ```
 
-### 5. Verify deployment
+### Step 5: Verify deployment
 ```bash
-sleep 2 && curl -s https://claude.technovators.co.za/api/health
+ssh technovators "sleep 2 && curl -s http://localhost:4200/api/health"
+curl -s https://claude.technovators.co.za/api/health
 ```
 
-Report success/failure to the user.
+### Step 6: Report status
+Tell the user:
+- Whether deployment succeeded or failed
+- The health check response
+- Any errors encountered
