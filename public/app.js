@@ -19,20 +19,13 @@ const tabContents = document.querySelectorAll('.tab-content');
 let isSubscribed = false;
 let swRegistration = null;
 
-// Update app badge count
-async function updateBadge(notifications) {
-  if ('setAppBadge' in navigator) {
-    const unreadCount = notifications ? notifications.filter(n => !n.read).length : 0;
-    if (unreadCount > 0) {
-      navigator.setAppBadge(unreadCount);
-    } else {
-      navigator.clearAppBadge();
-    }
-  }
-}
-
 // Initialize
 async function init() {
+  // Clear badge on app open
+  if ('clearAppBadge' in navigator) {
+    navigator.clearAppBadge();
+  }
+
   // Register service worker
   if ('serviceWorker' in navigator) {
     try {
@@ -121,7 +114,6 @@ async function loadNotifications() {
     const notifications = await res.json();
 
     renderNotifications(notifications);
-    updateBadge(notifications);
   } catch (err) {
     console.error('Failed to load notifications:', err);
     renderError('Failed to load notifications');
