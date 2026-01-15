@@ -1,6 +1,7 @@
 // Claude Notify PWA App
 
 const API_BASE = '';
+const TMUX_API = window.TMUX_API_URL || '';
 
 // DOM Elements
 const statusDot = document.getElementById('statusDot');
@@ -10,6 +11,9 @@ const subscribeBtn = document.getElementById('subscribeBtn');
 const notificationsContainer = document.getElementById('notifications');
 const countEl = document.getElementById('count');
 const clearAllBtn = document.getElementById('clearAllBtn');
+const sessionsContainer = document.getElementById('sessions');
+const tabs = document.querySelectorAll('.tab');
+const tabContents = document.querySelectorAll('.tab-content');
 
 // State
 let isSubscribed = false;
@@ -322,9 +326,209 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+// Tab switching
+function switchTab(tabName) {
+  tabs.forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.tab === tabName);
+  });
+  tabContents.forEach(content => {
+    content.classList.toggle('active', content.id === tabName + 'Tab');
+  });
+
+  if (tabName === 'sessions') {
+    loadSessions();
+  }
+}
+
+// Load tmux sessions
+async function loadSessions() {
+  if (!TMUX_API) {
+    renderSessionsError('Tmux API not configured');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${TMUX_API}/api/sessions`);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    renderSessions(data.sessions);
+  } catch (err) {
+    console.error('Failed to load sessions:', err);
+    renderSessionsError('Failed to load sessions');
+  }
+}
+
+// Render sessions error
+function renderSessionsError(message) {
+  sessionsContainer.innerHTML = `
+    <div class="sessions-error">
+      <p>${message}</p>
+      <button class="refresh-btn" onclick="loadSessions()">Retry</button>
+    </div>
+  `;
+}
+
+// Render sessions list
+function renderSessions(sessions) {
+  sessionsContainer.replaceChildren();
+
+  if (!sessions || sessions.length === 0) {
+    const div = document.createElement('div');
+    div.className = 'empty';
+    div.innerHTML = `
+      <div class="empty-icon">\u{1F4BB}</div>
+      <p>No tmux sessions found</p>
+      <button class="refresh-btn" onclick="loadSessions()">Refresh</button>
+    `;
+    sessionsContainer.appendChild(div);
+    return;
+  }
+
+  sessions.forEach(session => {
+    const card = document.createElement('div');
+    card.className = 'session-card';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'session-header';
+    header.addEventListener('click', () => {
+      card.classList.toggle('expanded');
+    });
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'session-name';
+    nameDiv.textContent = session.name;
+
+    const badge = document.createElement('span');
+    badge.className = 'session-badge ' + (session.attached ? 'attached' : 'detached');
+    badge.textContent = session.attached ? 'attached' : 'detached';
+    nameDiv.appendChild(badge);
+
+    const meta = document.createElement('div');
+    meta.className = 'session-meta';
+    meta.textContent = `${session.windows.length} window${session.windows.length !== 1 ? 's' : ''}`;
+
+    header.appendChild(nameDiv);
+    header.appendChild(meta);
+    card.appendChild(header);
+
+    // Windows
+    const windowsDiv = document.createElement('div');
+    windowsDiv.className = 'session-windows';
+
+    session.windows.forEach(win => {
+      const windowItem = document.createElement('div');
+      windowItem.className = 'window-item';
+
+      const info = document.createElement('div');
+      info.className = 'window-info';
+
+      const winName = document.createElement('div');
+      winName.className = 'window-name';
+
+      const index = document.createElement('span');
+      index.className = 'index';
+      index.textContent = `${win.index}:`;
+      winName.appendChild(index);
+
+      winName.appendChild(document.createTextNode(win.name));
+
+      if (win.active) {
+        const activeDot = document.createElement('span');
+        activeDot.className = 'active-dot';
+        winName.appendChild(activeDot);
+      }
+
+      info.appendChild(winName);
+
+      // Show pane title if available
+      if (win.panes && win.panes.length > 0) {
+        const pane = win.panes[0];
+        if (pane.title) {
+          const title = document.createElement('div');
+          title.className = 'window-title';
+          title.textContent = pane.title;
+          info.appendChild(title);
+        }
+        const cmd = document.createElement('div');
+        cmd.className = 'window-command';
+        cmd.textContent = pane.command;
+        info.appendChild(cmd);
+      }
+
+      windowItem.appendChild(info);
+
+      // Actions
+      const actions = document.createElement('div');
+      actions.className = 'window-actions';
+
+      const switchBtn = document.createElement('button');
+      switchBtn.textContent = 'Switch';
+      switchBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        switchToWindow(session.name, win.index, e.target);
+      });
+      actions.appendChild(switchBtn);
+
+      const termBtn = document.createElement('button');
+      termBtn.textContent = 'Terminal';
+      termBtn.style.background = 'var(--blue)';
+      termBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const target = `${session.name}:${win.index}`;
+        window.open(`${window.TTYD_URL}/?arg=${encodeURIComponent(target)}`, '_blank');
+      });
+      actions.appendChild(termBtn);
+
+      windowItem.appendChild(actions);
+      windowsDiv.appendChild(windowItem);
+    });
+
+    card.appendChild(windowsDiv);
+    sessionsContainer.appendChild(card);
+  });
+}
+
+// Switch to a specific window
+async function switchToWindow(session, windowIndex, btnElement) {
+  try {
+    const res = await fetch(`${TMUX_API}/api/switch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session, window: windowIndex })
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const result = await res.json();
+    if (result.success && btnElement) {
+      // Visual feedback
+      const originalText = btnElement.textContent;
+      btnElement.textContent = 'Switched!';
+      btnElement.disabled = true;
+      setTimeout(() => {
+        btnElement.textContent = originalText;
+        btnElement.disabled = false;
+      }, 1000);
+    }
+  } catch (err) {
+    console.error('Failed to switch:', err);
+    alert('Failed to switch: ' + err.message);
+  }
+}
+
 // Event listeners
 subscribeBtn.addEventListener('click', subscribe);
 clearAllBtn.addEventListener('click', clearAll);
+
+// Tab event listeners
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
 
 // Start app
 init();

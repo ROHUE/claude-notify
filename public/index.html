@@ -326,6 +326,243 @@
       font-size: 0.9375rem;
     }
 
+    /* Tab navigation */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 0.375rem;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 0.625rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: transparent;
+      color: var(--subtext);
+      border: none;
+      box-shadow: none;
+    }
+
+    .tab:hover {
+      color: var(--text);
+      background: var(--surface0);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .tab.active {
+      background: var(--mauve);
+      color: var(--crust);
+      box-shadow: 0 2px 8px rgba(203, 166, 247, 0.3);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Sessions styles */
+    .sessions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .session-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      overflow: hidden;
+      animation: fadeInUp 0.3s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .session-card:nth-child(1) { animation-delay: 0s; }
+    .session-card:nth-child(2) { animation-delay: 0.05s; }
+    .session-card:nth-child(3) { animation-delay: 0.1s; }
+
+    .session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.875rem 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .session-header:hover {
+      background: var(--surface0);
+    }
+
+    .session-name {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .session-badge {
+      font-size: 0.625rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .session-badge.attached {
+      background: rgba(166, 227, 161, 0.2);
+      color: var(--green);
+    }
+
+    .session-badge.detached {
+      background: rgba(108, 112, 134, 0.2);
+      color: var(--overlay0);
+    }
+
+    .session-meta {
+      font-size: 0.75rem;
+      color: var(--subtext);
+    }
+
+    .session-windows {
+      display: none;
+      border-top: 1px solid var(--surface0);
+    }
+
+    .session-card.expanded .session-windows {
+      display: block;
+    }
+
+    .window-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem 0.75rem 1.5rem;
+      border-bottom: 1px solid var(--surface0);
+      transition: background 0.2s ease;
+    }
+
+    .window-item:last-child {
+      border-bottom: none;
+    }
+
+    .window-item:hover {
+      background: rgba(203, 166, 247, 0.05);
+    }
+
+    .window-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .window-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .window-name .index {
+      color: var(--overlay0);
+      font-size: 0.75rem;
+    }
+
+    .window-name .active-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    .window-title {
+      font-size: 0.75rem;
+      color: var(--subtext);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .window-command {
+      font-size: 0.6875rem;
+      color: var(--overlay0);
+      font-family: monospace;
+    }
+
+    .window-actions {
+      display: flex;
+      gap: 0.375rem;
+      flex-shrink: 0;
+    }
+
+    .window-actions button {
+      padding: 0.375rem 0.625rem;
+      font-size: 0.6875rem;
+      border-radius: 6px;
+    }
+
+    .panes-list {
+      padding: 0.5rem 1rem 0.75rem 2.5rem;
+      background: var(--mantle);
+    }
+
+    .pane-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0;
+      font-size: 0.75rem;
+      color: var(--subtext);
+    }
+
+    .pane-item .active-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .sessions-loading,
+    .sessions-error {
+      text-align: center;
+      padding: 3rem;
+      color: var(--subtext);
+    }
+
+    .sessions-error {
+      color: var(--red);
+    }
+
+    .refresh-btn {
+      background: var(--surface1);
+      color: var(--text);
+      box-shadow: none;
+      margin-top: 1rem;
+    }
+
     /* Mobile optimizations */
     @media (max-width: 480px) {
       header {
@@ -366,19 +603,33 @@
       <button id="subscribeBtn">Enable Notifications</button>
     </div>
 
-    <div class="actions-bar">
-      <span class="count" id="count"></span>
-      <button class="secondary" id="clearAllBtn" style="display: none;">Clear All</button>
+    <div class="tabs">
+      <button class="tab active" data-tab="notifications">Notifications</button>
+      <button class="tab" data-tab="sessions">Sessions</button>
     </div>
 
-    <div id="notifications" class="notifications">
-      <div class="loading">Loading...</div>
+    <div id="notificationsTab" class="tab-content active">
+      <div class="actions-bar">
+        <span class="count" id="count"></span>
+        <button class="secondary" id="clearAllBtn" style="display: none;">Clear All</button>
+      </div>
+
+      <div id="notifications" class="notifications">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+    <div id="sessionsTab" class="tab-content">
+      <div id="sessions" class="sessions">
+        <div class="sessions-loading">Loading sessions...</div>
+      </div>
     </div>
   </main>
 
   <script>
     // Terminal configuration
     window.TTYD_URL = 'https://claude.technovators.co.za/terminal';
+    window.TMUX_API_URL = 'https://claude.technovators.co.za/tmux-api';
   </script>
   <script src="/app.js"></script>
 </body>
