@@ -76,7 +76,39 @@ self.addEventListener('push', event => {
 
   event.waitUntil(
     self.registration.showNotification(data.title, options)
+      .then(() => updateBadgeCount())
   );
+});
+
+// Update badge count based on unread notifications
+async function updateBadgeCount() {
+  try {
+    const res = await fetch('/api/notifications');
+    if (res.ok) {
+      const notifications = await res.json();
+      const unreadCount = notifications.filter(n => !n.read).length;
+      if ('setAppBadge' in navigator) {
+        if (unreadCount > 0) {
+          navigator.setAppBadge(unreadCount);
+        } else {
+          navigator.clearAppBadge();
+        }
+      }
+    }
+  } catch (e) {
+    // Ignore errors
+  }
+}
+
+// Listen for messages from the app to update badge
+self.addEventListener('message', event => {
+  if (event.data === 'updateBadge') {
+    updateBadgeCount();
+  } else if (event.data === 'clearBadge') {
+    if ('clearAppBadge' in navigator) {
+      navigator.clearAppBadge();
+    }
+  }
 });
 
 // Notification clicked
